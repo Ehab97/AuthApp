@@ -3,6 +3,7 @@ import AuthContent from "../components/auth/AuthContent";
 import { authenticate, createUser } from "../util/auth";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { firbaseUrlModes } from "../constants/config";
+import { Alert } from "react-native";
 
 function SignupScreen() {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,10 @@ function SignupScreen() {
     try {
       const res = await createUser(email, password);
       console.log(res);
-    } catch (error) {}
+    } catch (error) {
+      console.log("signupScreen.js error: ", error);
+      Alert.alert("Signup Failed", "Please check your entered credentials.");
+    }
     setLoading(false);
   };
 
