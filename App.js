@@ -7,8 +7,10 @@ import SignupScreen from "./src/screens/SignUpScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import { Colors } from "./src/constants/styles";
 import { AuthContext, AuthContextProvider } from "./src/store/auth-context";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import IconButton from "./src/components/ui/IconButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoadingOverlay from "./src/components/ui/LoadingOverlay";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,14 +44,7 @@ function AuthenticatedStack() {
         component={WelcomeScreen}
         options={{
           headerRight: ({ tintColor }) => {
-            return (
-              <IconButton
-                icon={"exit"}
-                color={tintColor}
-                size={24}
-                onPress={authCTX.logout}
-              />
-            );
+            return <IconButton icon={"exit"} color={tintColor} size={24} onPress={authCTX.logout} />;
           },
         }}
       />
@@ -62,12 +57,38 @@ function Navigation() {
   return <NavigationContainer>{authCTX.isAuthnticated ? <AuthenticatedStack /> : <AuthStack />}</NavigationContainer>;
 }
 
+const Root = () => {
+  const authCTX = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const fetchToken = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        authCTX.authenticate(token);
+      }
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchToken();
+  }, []);
+
+  if (loading) return <LoadingOverlay message={`Checking user authentication...`} />;
+
+  return <Navigation />;
+};
+
 export default function App() {
   return (
     <>
       <StatusBar style="light" />
       <AuthContextProvider>
-        <Navigation />
+        <Root />
       </AuthContextProvider>
     </>
   );
