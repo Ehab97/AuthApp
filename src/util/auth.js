@@ -39,7 +39,7 @@ export const authenticate = async (mode, email, password) => {
       returnSecureToken: true,
     });
     console.log(response);
-    return response;
+    return response.data;
   } catch (error) {
     console.log(`authenticate ${error}`);
     const message = getErrorMessage(error);
